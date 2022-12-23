@@ -34,14 +34,14 @@ const attributes = {
     comment: null,
     field: "date",
   },
-  subtotal: {
+  subTotal: {
     type: DataTypes.STRING(45),
     allowNull: false,
     defaultValue: null,
     primaryKey: false,
     autoIncrement: false,
     comment: null,
-    field: "subtotal",
+    field: "subTotal",
   },
   discount: {
     type: DataTypes.INTEGER(11),

@@ -47,15 +47,6 @@ const attributes = {
     comment: null,
     field: "quantity",
   },
-  total: {
-    type: DataTypes.STRING(45),
-    allowNull: false,
-    defaultValue: null,
-    primaryKey: false,
-    autoIncrement: false,
-    comment: null,
-    field: "total",
-  },
 };
 const options = {
   tableName: "Invoice_details",
