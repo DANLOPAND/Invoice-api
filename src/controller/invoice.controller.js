@@ -1,26 +1,53 @@
 import Invoice from "../../models/invoice.model.js";
 import InvoiceDetails from "../../models/invoiceDetails.model.js";
+import { QueryTypes } from "sequelize";
 import validateInvoice from "../validators/invoice.validate.js";
 import validateInvoiceDetails from "../validators/inoviceDetails.validate.js";
-import { json } from "sequelize";
 
 const getInvoices = async (req, res) => {
-  Invoice
-    .findAll()
-    .then((invoices) => {
-      res.status(200).json(invoices);
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message:
-          err.message || "Some error occurred while retrieving invoices.",
-      });
+  try {
+    const query = `
+    SELECT i.id, clients.name, i.date, i.subTotal, i.discount, i.total
+    FROM invoices i
+    INNER JOIN clients ON clients.id = i.idClient`;
+
+    const invoices = await Invoice.sequelize.query(query, {
+      type: QueryTypes.SELECT,
     });
+    console.log(invoices);
+    res.status(200).json(invoices);
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || "Some error occurred while retrieving invoices.",
+    });
+  }
+};
+
+const findInvoiceDetails = async (req, res) => {
+  try {
+    const query = `SELECT i.id AS id, invoices.id AS id_invoice, products.id AS id_product, products.name, i.quantity, products.price
+    FROM Invoice_details i 
+    INNER JOIN invoices ON invoices.id = i.idInvoice INNER JOIN products ON products.id = i.idProduct
+    WHERE i.idInvoice = ${req.params.id}`;
+
+    const invoiceDetails = await Invoice.sequelize.query
+    (query, {
+      type: QueryTypes.SELECT,
+    });
+    console.log(invoiceDetails);
+    res.status(200).json(invoiceDetails);
+  } catch (err) {
+    res.status(500).json({
+      message:
+        err.message || "Some error occurred while retrieving invoice details.",
+    });
+  }
+
 };
 
 const findInvoice = async (req, res) => {
-  Invoice
-    .findOne({ where: { id: req.params.id } })
+  Invoice.findOne({ where: { id: req.params.id } })
     .then((invoice) => {
       res.status(200).json(invoice);
     })
@@ -32,19 +59,17 @@ const findInvoice = async (req, res) => {
 };
 
 const createInvoice = async (req, res) => {
-
   const setInvoiceDetails = (idInvoice, invoiceDetails) => {
-    InvoiceDetails.bulkCreate(invoiceDetails.map((detail) => {
-      return {
-        idInvoice: idInvoice,
-        idProduct: detail.idProduct,
-        quantity: detail.quantity,
-      }
-    }))
+    InvoiceDetails.bulkCreate(
+      invoiceDetails.map((detail) => {
+        return {
+          idInvoice: idInvoice,
+          idProduct: detail.idProduct,
+          quantity: detail.quantity,
+        };
+      })
+    );
   };
-
-
-  let idInvoice;
 
   const invoice = {
     idClient: req.body.idClient,
@@ -62,13 +87,10 @@ const createInvoice = async (req, res) => {
     return res.status(400).json({ message: "Invoice details is required" });
   }
   req.body.invoiceDetails.forEach((detail) => {
-    const { error: errorInvoiceDetails } = validateInvoiceDetails(
-      detail
-    );
+    const { error: errorInvoiceDetails } = validateInvoiceDetails(detail);
   });
-    
-  Invoice
-    .create(invoice)
+
+  Invoice.create(invoice)
     .then((newInvoice) => {
       setInvoiceDetails(newInvoice.id, req.body.invoiceDetails);
       res.status(201).json(newInvoice);
@@ -78,8 +100,6 @@ const createInvoice = async (req, res) => {
         message: err.message || "Some error occurred while creating invoice.",
       });
     });
-
-    
 };
 
-export { getInvoices, findInvoice, createInvoice };
+export { getInvoices, findInvoice, createInvoice, findInvoiceDetails };
