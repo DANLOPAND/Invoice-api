@@ -1,6 +1,8 @@
 import products from "../../models/product.model.js";
 import validateProduct from "../validators/product.validate.js";
 
+
+// Retrieve all products from the database. (GET)
 const getProducts = async (req, res) => {
   products.findAll().then((products) => {
     res.status(200).json(products);

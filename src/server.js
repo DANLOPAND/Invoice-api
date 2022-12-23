@@ -6,10 +6,13 @@ import invoicesRoutes from "./routes/invoice.routes.js";
 import cors from "cors";
 
 const app = express();
+
+// middlewares
 app.use(cors());
 app.use(morgan("dev"));
 app.use(json());
 
+// routes
 app.use(productsRoutes);
 app.use(clientsRoutes);
 app.use(invoicesRoutes);

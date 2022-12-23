@@ -4,6 +4,7 @@ import { QueryTypes } from "sequelize";
 import validateInvoice from "../validators/invoice.validate.js";
 import validateInvoiceDetails from "../validators/inoviceDetails.validate.js";
 
+// Retrieve all invoices from the database with the client name. (GET)
 const getInvoices = async (req, res) => {
   try {
     const query = `
@@ -22,8 +23,9 @@ const getInvoices = async (req, res) => {
       message: err.message || "Some error occurred while retrieving invoices.",
     });
   }
-};
+}; 
 
+// Retrieve the details from the database with the invoice id
 const findInvoiceDetails = async (req, res) => {
   try {
     const query = `SELECT i.id AS id, invoices.id AS id_invoice, products.id AS id_product, products.name, i.quantity, products.price
@@ -45,7 +47,7 @@ const findInvoiceDetails = async (req, res) => {
   }
 
 };
-
+// Retrieve an invoice from the database with the invoice id
 const findInvoice = async (req, res) => {
   Invoice.findOne({ where: { id: req.params.id } })
     .then((invoice) => {
@@ -58,7 +60,9 @@ const findInvoice = async (req, res) => {
     });
 };
 
+// Create and Save a new invoice
 const createInvoice = async (req, res) => {
+  // Validate request body
   const setInvoiceDetails = (idInvoice, invoiceDetails) => {
     InvoiceDetails.bulkCreate(
       invoiceDetails.map((detail) => {
